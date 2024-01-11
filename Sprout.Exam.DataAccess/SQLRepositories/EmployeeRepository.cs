@@ -1,8 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Sprout.Exam.Business.Contracts;
 using Sprout.Exam.Business.DataTransferObjects;
 using Sprout.Exam.Business.Models;
-using Sprout.Exam.DataAccess.Contracts;
-using Sprout.Exam.WebApp.Data;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,38 +10,39 @@ namespace Sprout.Exam.DataAccess.SQLRepositories
 {
     public class EmployeeRepository : IEmployeeRepository
     {
-        private readonly ApplicationDbContext dbContext;
+        private readonly EmployeeDbContext dbContext;
 
-        public EmployeeRepository(ApplicationDbContext dbContext)
+        public EmployeeRepository(EmployeeDbContext dbContext)
         {
             this.dbContext = dbContext;
         }
 
         public async Task<EmployeeDto> GetByIdAsync(int id)
         {
-            var employee = await dbContext.Employees.FindAsync(id);
+            var employee = await dbContext.Employee
+                .FirstOrDefaultAsync(e => e.IsDeleted == false && e.Id == id);
 
             return new EmployeeDto
             {
-                Birthdate = employee.Birthdate,
+                Birthdate = employee.Birthdate.ToShortDateString(),
                 FullName = employee.FullName,
                 Id = employee.Id,
-                Tin = employee.Tin,
-                TypeId = employee.TypeId,
+                Tin = employee.TIN,
+                TypeId = employee.EmployeeTypeId,
             };
         }
 
         public async Task<IEnumerable<EmployeeDto>> GetAllAsync()
         {
-            var employees = await dbContext.Employees.ToListAsync();
+            var employees = await dbContext.Employee.Where(e => e.IsDeleted == false).ToListAsync();
 
             return employees.Select(employee => new EmployeeDto
             {
-                Birthdate = employee.Birthdate,
+                Birthdate = employee.Birthdate.ToShortDateString(),
                 FullName = employee.FullName,
                 Id = employee.Id,
-                Tin = employee.Tin,
-                TypeId = employee.TypeId
+                Tin = employee.TIN,
+                TypeId = employee.EmployeeTypeId,
             });
         }
 
@@ -50,13 +50,13 @@ namespace Sprout.Exam.DataAccess.SQLRepositories
         {
             var employeeEntity = new Employee
             {
-                Birthdate = employee.Birthdate.ToShortDateString(),
+                Birthdate = employee.Birthdate,
                 FullName = employee.FullName,
-                Tin = employee.Tin,
-                TypeId = employee.TypeId
+                TIN = employee.Tin,
+                EmployeeTypeId = employee.TypeId
             };
 
-            await dbContext.Employees.AddAsync(employeeEntity);
+            await dbContext.Employee.AddAsync(employeeEntity);
             await dbContext.SaveChangesAsync();
         }
 
@@ -65,22 +65,25 @@ namespace Sprout.Exam.DataAccess.SQLRepositories
             var employeeEntity = new Employee
             {
                 Id = employee.Id,
-                Birthdate = employee.Birthdate.ToShortDateString(),
+                Birthdate = employee.Birthdate,
                 FullName = employee.FullName,
-                Tin = employee.Tin,
-                TypeId = employee.TypeId
+                TIN = employee.Tin,
+                EmployeeTypeId = employee.TypeId
             };
 
-            dbContext.Employees.Update(employeeEntity);
+            dbContext.Employee.Update(employeeEntity);
             await dbContext.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(int id)
         {
-            var employee = await dbContext.Employees.FindAsync(id);
+            var employee = await dbContext.Employee
+                .FirstOrDefaultAsync(e => e.IsDeleted == false && e.Id == id);
+
             if (employee != null)
             {
-                dbContext.Employees.Remove(employee);
+                employee.IsDeleted = true;
+                dbContext.Employee.Update(employee);
                 await dbContext.SaveChangesAsync();
             }
         }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Sprout.Exam.DataAccess.Contracts
+namespace Sprout.Exam.Business.Contracts
 {
     public interface IEmployeeRepository
     {
