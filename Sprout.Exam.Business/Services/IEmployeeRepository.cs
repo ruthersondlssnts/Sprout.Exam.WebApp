@@ -9,7 +9,7 @@ namespace Sprout.Exam.Business.Contracts
         Task<IEnumerable<Employee>> GetAllAsync();
         Task AddAsync(Employee employee);
         Task<Employee> GetByIdAsync(int id);
-        Task DeleteAsync(int id);
-        Task UpdateAsync(Employee id);
+        Task DeleteAsync(Employee employee);
+        Task UpdateAsync(Employee employee);
     }
 }

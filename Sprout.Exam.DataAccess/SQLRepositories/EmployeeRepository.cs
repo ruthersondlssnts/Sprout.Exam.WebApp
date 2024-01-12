@@ -43,11 +43,8 @@ namespace Sprout.Exam.DataAccess.SQLRepositories
             await dbContext.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(Employee employee)
         {
-            var employee = await dbContext.Employee
-                .FirstOrDefaultAsync(e => e.IsDeleted == false && e.Id == id);
-
             if (employee != null)
             {
                 employee.IsDeleted = true;
