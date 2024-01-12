@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Sprout.Exam.Business.Contracts;
-using Sprout.Exam.Business.DataTransferObjects;
 using Sprout.Exam.Business.Models;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,61 +16,30 @@ namespace Sprout.Exam.DataAccess.SQLRepositories
             this.dbContext = dbContext;
         }
 
-        public async Task<EmployeeDto> GetByIdAsync(int id)
+        public async Task<Employee> GetByIdAsync(int id)
         {
             var employee = await dbContext.Employee
                 .FirstOrDefaultAsync(e => e.IsDeleted == false && e.Id == id);
 
-            return new EmployeeDto
-            {
-                Birthdate = employee.Birthdate.ToShortDateString(),
-                FullName = employee.FullName,
-                Id = employee.Id,
-                Tin = employee.TIN,
-                TypeId = employee.EmployeeTypeId,
-            };
+            return employee;
         }
 
-        public async Task<IEnumerable<EmployeeDto>> GetAllAsync()
+        public async Task<IEnumerable<Employee>> GetAllAsync()
         {
             var employees = await dbContext.Employee.Where(e => e.IsDeleted == false).ToListAsync();
 
-            return employees.Select(employee => new EmployeeDto
-            {
-                Birthdate = employee.Birthdate.ToShortDateString(),
-                FullName = employee.FullName,
-                Id = employee.Id,
-                Tin = employee.TIN,
-                TypeId = employee.EmployeeTypeId,
-            });
+            return employees;
         }
 
-        public async Task AddAsync(CreateEmployeeDto employee)
+        public async Task AddAsync(Employee employee)
         {
-            var employeeEntity = new Employee
-            {
-                Birthdate = employee.Birthdate,
-                FullName = employee.FullName,
-                TIN = employee.Tin,
-                EmployeeTypeId = employee.TypeId
-            };
-
-            await dbContext.Employee.AddAsync(employeeEntity);
+            await dbContext.Employee.AddAsync(employee);
             await dbContext.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(EditEmployeeDto employee)
+        public async Task UpdateAsync(Employee employee)
         {
-            var employeeEntity = new Employee
-            {
-                Id = employee.Id,
-                Birthdate = employee.Birthdate,
-                FullName = employee.FullName,
-                TIN = employee.Tin,
-                EmployeeTypeId = employee.TypeId
-            };
-
-            dbContext.Employee.Update(employeeEntity);
+            dbContext.Employee.Update(employee);
             await dbContext.SaveChangesAsync();
         }
 

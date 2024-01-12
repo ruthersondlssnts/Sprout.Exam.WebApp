@@ -1,4 +1,4 @@
-﻿using Sprout.Exam.Business.DataTransferObjects;
+﻿using Sprout.Exam.Business.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -6,10 +6,10 @@ namespace Sprout.Exam.Business.Contracts
 {
     public interface IEmployeeRepository
     {
-        Task<IEnumerable<EmployeeDto>> GetAllAsync();
-        Task AddAsync(CreateEmployeeDto employee);
-        Task<EmployeeDto> GetByIdAsync(int id);
+        Task<IEnumerable<Employee>> GetAllAsync();
+        Task AddAsync(Employee employee);
+        Task<Employee> GetByIdAsync(int id);
         Task DeleteAsync(int id);
-        Task UpdateAsync(EditEmployeeDto id);
+        Task UpdateAsync(Employee id);
     }
 }
