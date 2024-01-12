@@ -4,6 +4,7 @@ using Sprout.Exam.Business.Contracts;
 using Sprout.Exam.Business.DataTransferObjects;
 using Sprout.Exam.Business.Models;
 using Sprout.Exam.Common.Enums;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -48,7 +49,14 @@ namespace Sprout.Exam.WebApp.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _employeeRepository.GetByIdAsync(id);
-            return Ok(result);
+            return Ok(new EmployeeDto
+            {
+                Id = result.Id,
+                Birthdate = result.Birthdate.ToString("yyyy-MM-dd"),
+                FullName = result.FullName,
+                Tin = result.TIN,
+                TypeId = result.EmployeeTypeId
+            });
         }
 
         /// <summary>
@@ -121,23 +129,18 @@ namespace Sprout.Exam.WebApp.Controllers
         /// <param name="workedDays"></param>
         /// <returns></returns>
         [HttpPost("{id}/calculate")]
-        public async Task<IActionResult> Calculate(int id, decimal absentDays, decimal workedDays)
+        public async Task<IActionResult> Calculate(int id, [FromBody] CalculateRequest calculateRequest)
         {
-            var result = await Task.FromResult(StaticEmployees.ResultList.FirstOrDefault(m => m.Id == id));
+            var result = await _employeeRepository.GetByIdAsync(id);
 
             if (result == null) return NotFound();
-            var type = (EmployeeType)result.TypeId;
-            return type switch
-            {
-                EmployeeType.Regular =>
-                    //create computation for regular.
-                    Ok(25000),
-                EmployeeType.Contractual =>
-                    //create computation for contractual.
-                    Ok(20000),
-                _ => NotFound("Employee Type not found")
-            };
 
+            var type = (EmployeeType)result.EmployeeTypeId;
+
+            if (Enum.IsDefined(typeof(EmployeeType), type))
+                return Ok(EmployeeFactory.CreateEmployee(type, calculateRequest).CalculateSalary());
+            else
+                return NotFound("Employee Type not found");
         }
 
     }

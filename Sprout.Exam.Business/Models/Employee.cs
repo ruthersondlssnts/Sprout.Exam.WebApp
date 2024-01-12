@@ -10,5 +10,11 @@ namespace Sprout.Exam.Business.Models
         public string TIN { get; set; }
         public int EmployeeTypeId { get; set; }
         public bool IsDeleted { get; set; }
+
+        public virtual decimal CalculateSalary()
+        {
+            // Base implementation for generic employees
+            return 0;
+        }
     }
 }
