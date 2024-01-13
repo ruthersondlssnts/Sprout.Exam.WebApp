@@ -7,6 +7,7 @@ using Sprout.Exam.Common.Enums;
 using Sprout.Exam.WebApp;
 using Sprout.Exam.WebApp.Controllers;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Xunit;
 
@@ -75,6 +76,67 @@ namespace Sprout.Exam.Test
             Assert.NotNull(result);
             var createdResult = Assert.IsType<CreatedResult>(result);
             Assert.IsType<int>(createdResult.Value);
+        }
+
+        [Fact]
+        public void InvalidCreateEditRequest()
+        {
+            //arrange
+            var employee = StaticEmployees.Result[1];
+
+            var dtoCreate = new CreateEmployeeDto //Invalid Requests
+            {
+                Birthdate = employee.Birthdate,
+                FullName = "",
+                Tin = "",
+                TypeId = employee.EmployeeTypeId
+            };
+
+            var dtoEdited = new EditEmployeeDto
+            {
+                Birthdate = employee.Birthdate,
+                FullName = "",
+                Tin = "",
+                Id = employee.Id,
+                TypeId = employee.EmployeeTypeId
+            };
+            //act
+            var resultCreate = Validator.TryValidateObject(dtoCreate, new ValidationContext(dtoCreate, null, null), null, true);
+            var resultEdit = Validator.TryValidateObject(dtoEdited, new ValidationContext(dtoEdited, null, null), null, true);
+
+            //assert
+            Assert.False(resultCreate);
+            Assert.False(resultEdit);
+        }
+
+        [Fact]
+        public void ValidCreateEditRequest()
+        {
+            //arrange
+            var employee = StaticEmployees.Result[1];
+
+            var dtoCreated = new CreateEmployeeDto
+            {
+                Birthdate = employee.Birthdate,
+                FullName = employee.FullName,
+                Tin = employee.TIN,
+                TypeId = employee.EmployeeTypeId
+            };
+
+            var dtoEdited = new EditEmployeeDto
+            {
+                Birthdate = employee.Birthdate,
+                FullName = employee.FullName,
+                Tin = employee.TIN,
+                TypeId = employee.EmployeeTypeId,
+                Id = employee.Id,
+            };
+
+            var resultCreate = Validator.TryValidateObject(dtoCreated, new ValidationContext(dtoCreated, null, null), null, true);
+            var resultEdit = Validator.TryValidateObject(dtoEdited, new ValidationContext(dtoEdited, null, null), null, true);
+
+            Assert.True(resultCreate);
+            Assert.True(resultEdit);
         }
 
         [Fact]
