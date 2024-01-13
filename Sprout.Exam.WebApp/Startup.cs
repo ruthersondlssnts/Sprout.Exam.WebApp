@@ -10,6 +10,7 @@ using Sprout.Exam.Business.Contracts;
 using Sprout.Exam.DataAccess;
 using Sprout.Exam.DataAccess.SQLRepositories;
 using Sprout.Exam.WebApp.Data;
+using Sprout.Exam.WebApp.Extensions;
 using Sprout.Exam.WebApp.Models;
 
 namespace Sprout.Exam.WebApp
@@ -77,7 +78,7 @@ namespace Sprout.Exam.WebApp
             app.UseSpaStaticFiles();
 
             app.UseRouting();
-
+            app.ConfigureExceptionHandler();
             app.UseAuthentication();
             app.UseIdentityServer();
             app.UseAuthorization();
